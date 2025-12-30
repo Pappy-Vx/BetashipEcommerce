@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BetashipEcommerce.API/BetashipEcommerce.API.csproj" />
+  <Project Path="BetashipEcommerce.APP/BetashipEcommerce.APP.csproj" />
+  <Project Path="BetashipEcommerce.CORE/BetashipEcommerce.CORE.csproj" />
+  <Project Path="BetashipEcommerce.DAL/BetashipEcommerce.DAL.csproj" />
+</Solution>

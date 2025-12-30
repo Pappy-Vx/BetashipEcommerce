@@ -1,0 +1,6 @@
+@BetashipEcommerce.API_HostAddress = http://localhost:5250
+
+GET {{BetashipEcommerce.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
