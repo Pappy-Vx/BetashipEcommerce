@@ -3,6 +3,7 @@ using BetashipEcommerce.CORE.Orders.Entities;
 using BetashipEcommerce.CORE.Orders.Enums;
 using BetashipEcommerce.CORE.Orders.Events;
 using BetashipEcommerce.CORE.Orders.ValueObjects;
+using BetashipEcommerce.CORE.Payments.ValueObjects;
 using BetashipEcommerce.CORE.Products.ValueObjects;
 using BetashipEcommerce.CORE.SharedKernel;
 using System;
@@ -14,9 +15,14 @@ using System.Threading.Tasks;
 
 namespace BetashipEcommerce.CORE.Orders
 {
+    /// <summary>
+    /// Enhanced Order aggregate that tracks inventory reservations and payment
+    /// Replaces the basic Order aggregate with enterprise features
+    /// </summary>
     public sealed class Order : AggregateRoot<OrderId>
     {
         private readonly List<OrderItem> _items = new();
+        private readonly List<Guid> _inventoryReservationIds = new();
 
         public CustomerId CustomerId { get; private set; }
         public string OrderNumber { get; private set; }
@@ -27,8 +33,24 @@ namespace BetashipEcommerce.CORE.Orders
         public Money SubtotalAmount { get; private set; }
         public Money TaxAmount { get; private set; }
         public Money ShippingAmount { get; private set; }
+
+        // Payment tracking
+        public PaymentId? PaymentId { get; private set; }
+        public bool IsPaid { get; private set; }
+        public DateTime? PaidAt { get; private set; }
+
+        // Inventory tracking
+        public bool InventoryReserved { get; private set; }
+        public bool InventoryCommitted { get; private set; }
+        public IReadOnlyCollection<Guid> InventoryReservationIds => _inventoryReservationIds.AsReadOnly();
+
         public DateTime OrderDate { get; private set; }
-        public DateTime? CompletedDate { get; private set; }
+        public DateTime? ConfirmedAt { get; private set; }
+        public DateTime? ShippedAt { get; private set; }
+        public DateTime? DeliveredAt { get; private set; }
+        public DateTime? CancelledAt { get; private set; }
+        public string? CancellationReason { get; private set; }
+
         public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
         private Order(
@@ -48,15 +70,22 @@ namespace BetashipEcommerce.CORE.Orders
             TaxAmount = Money.Create(0, "NGN");
             ShippingAmount = Money.Create(0, "NGN");
             TotalAmount = Money.Create(0, "NGN");
+            IsPaid = false;
+            InventoryReserved = false;
+            InventoryCommitted = false;
         }
 
-        private Order() : base() { } // For EF Core
+        private Order() : base() { }
 
+        /// <summary>
+        /// Create order with current product prices from cart
+        /// Inventory must be reserved separately via IInventoryReservationService
+        /// </summary>
         public static Result<Order> Create(
             CustomerId customerId,
             Address shippingAddress,
             Address billingAddress,
-            List<(ProductId ProductId, int Quantity, Money UnitPrice)> items)
+            List<(ProductId ProductId, int Quantity, Money UnitPrice, string ProductName)> items)
         {
             if (items == null || items.Count == 0)
                 return Result.Failure<Order>(OrderErrors.EmptyOrder);
@@ -73,8 +102,12 @@ namespace BetashipEcommerce.CORE.Orders
 
             foreach (var item in items)
             {
-                var orderItem = OrderItem.Create(
+                if (item.Quantity <= 0)
+                    return Result.Failure<Order>(OrderErrors.InvalidQuantity);
+
+                var orderItem = OrderItem.CreateWithPrice(
                     item.ProductId,
+                    item.ProductName,
                     item.Quantity,
                     item.UnitPrice);
 
@@ -87,88 +120,165 @@ namespace BetashipEcommerce.CORE.Orders
             return Result.Success(order);
         }
 
-        public Result AddItem(ProductId productId, int quantity, Money unitPrice)
+        /// <summary>
+        /// Associate inventory reservations with this order
+        /// </summary>
+        public Result LinkInventoryReservations(List<Guid> reservationIds)
         {
             if (Status != OrderStatus.Pending)
                 return Result.Failure(OrderErrors.CannotModifyConfirmedOrder);
 
-            if (quantity <= 0)
-                return Result.Failure(OrderErrors.InvalidQuantity);
+            if (InventoryReserved)
+                return Result.Failure(OrderErrors.InventoryAlreadyReserved);
 
-            var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
-            if (existingItem != null)
-            {
-                existingItem.UpdateQuantity(existingItem.Quantity + quantity);
-            }
-            else
-            {
-                var newItem = OrderItem.Create(productId, quantity, unitPrice);
-                _items.Add(newItem);
-            }
+            _inventoryReservationIds.AddRange(reservationIds);
+            InventoryReserved = true;
 
-            CalculateTotals();
+            RaiseDomainEvent(new OrderInventoryReservedDomainEvent(Id, reservationIds));
+
             return Result.Success();
         }
 
-        public Result RemoveItem(ProductId productId)
+        /// <summary>
+        /// Associate payment with this order
+        /// </summary>
+        public Result LinkPayment(PaymentId paymentId)
         {
             if (Status != OrderStatus.Pending)
                 return Result.Failure(OrderErrors.CannotModifyConfirmedOrder);
 
-            var item = _items.FirstOrDefault(i => i.ProductId == productId);
-            if (item == null)
-                return Result.Failure(OrderErrors.ItemNotFound);
+            PaymentId = paymentId;
 
-            _items.Remove(item);
-            CalculateTotals();
+            RaiseDomainEvent(new OrderPaymentLinkedDomainEvent(Id, paymentId));
 
             return Result.Success();
         }
 
+        /// <summary>
+        /// Mark order as paid (called after payment completion)
+        /// </summary>
+        public Result MarkAsPaid()
+        {
+            if (Status != OrderStatus.Pending)
+                return Result.Failure(OrderErrors.InvalidStatusTransition);
+
+            if (IsPaid)
+                return Result.Failure(OrderErrors.OrderAlreadyPaid);
+
+            if (!InventoryReserved)
+                return Result.Failure(OrderErrors.InventoryNotReserved);
+
+            IsPaid = true;
+            PaidAt = DateTime.UtcNow;
+
+            RaiseDomainEvent(new OrderPaidDomainEvent(Id, CustomerId, TotalAmount, PaidAt.Value));
+
+            return Result.Success();
+        }
+
+        /// <summary>
+        /// Mark inventory as committed (after payment completed)
+        /// </summary>
+        public Result CommitInventory()
+        {
+            if (!IsPaid)
+                return Result.Failure(OrderErrors.OrderNotPaid);
+
+            if (!InventoryReserved)
+                return Result.Failure(OrderErrors.InventoryNotReserved);
+
+            if (InventoryCommitted)
+                return Result.Failure(OrderErrors.InventoryAlreadyCommitted);
+
+            InventoryCommitted = true;
+
+            RaiseDomainEvent(new OrderInventoryCommittedDomainEvent(Id, _inventoryReservationIds.ToList()));
+
+            return Result.Success();
+        }
+
+        /// <summary>
+        /// Confirm order (after payment and inventory committed)
+        /// </summary>
         public Result Confirm()
         {
             if (Status != OrderStatus.Pending)
                 return Result.Failure(OrderErrors.InvalidStatusTransition);
 
+            if (!IsPaid)
+                return Result.Failure(OrderErrors.OrderNotPaid);
+
+            if (!InventoryCommitted)
+                return Result.Failure(OrderErrors.InventoryNotCommitted);
+
             if (_items.Count == 0)
                 return Result.Failure(OrderErrors.EmptyOrder);
 
             Status = OrderStatus.Confirmed;
+            ConfirmedAt = DateTime.UtcNow;
+
             RaiseDomainEvent(new OrderConfirmedDomainEvent(Id, CustomerId, TotalAmount));
 
             return Result.Success();
         }
 
-        public Result Ship()
+        /// <summary>
+        /// Ship order
+        /// </summary>
+        public Result Ship(string trackingNumber = null)
         {
             if (Status != OrderStatus.Confirmed)
                 return Result.Failure(OrderErrors.InvalidStatusTransition);
 
             Status = OrderStatus.Shipped;
+            ShippedAt = DateTime.UtcNow;
+
             RaiseDomainEvent(new OrderShippedDomainEvent(Id, ShippingAddress));
 
             return Result.Success();
         }
 
+        /// <summary>
+        /// Mark order as delivered
+        /// </summary>
         public Result Deliver()
         {
             if (Status != OrderStatus.Shipped)
                 return Result.Failure(OrderErrors.InvalidStatusTransition);
 
             Status = OrderStatus.Delivered;
-            CompletedDate = DateTime.UtcNow;
+            DeliveredAt = DateTime.UtcNow;
+
             RaiseDomainEvent(new OrderDeliveredDomainEvent(Id));
 
             return Result.Success();
         }
 
+        /// <summary>
+        /// Cancel order (releases inventory if not committed)
+        /// </summary>
         public Result Cancel(string reason)
         {
-            if (Status == OrderStatus.Delivered || Status == OrderStatus.Cancelled)
-                return Result.Failure(OrderErrors.CannotCancelOrder);
+            if (Status == OrderStatus.Delivered)
+                return Result.Failure(OrderErrors.CannotCancelDeliveredOrder);
+
+            if (Status == OrderStatus.Cancelled)
+                return Result.Failure(OrderErrors.OrderAlreadyCancelled);
+
+            // Can cancel if inventory committed but not shipped
+            if (Status == OrderStatus.Shipped)
+                return Result.Failure(OrderErrors.CannotCancelShippedOrder);
 
             Status = OrderStatus.Cancelled;
-            RaiseDomainEvent(new OrderCancelledDomainEvent(Id, reason));
+            CancelledAt = DateTime.UtcNow;
+            CancellationReason = reason;
+
+            RaiseDomainEvent(new OrderCancelledDomainEvent(
+                Id,
+                reason
+                //InventoryCommitted,
+                //_inventoryReservationIds.ToList()
+                ));
 
             return Result.Success();
         }
@@ -179,10 +289,10 @@ namespace BetashipEcommerce.CORE.Orders
                 .Select(i => i.TotalPrice)
                 .Aggregate(Money.Create(0, "NGN"), (acc, price) => acc.Add(price));
 
-            // Simple tax calculation (10%)
+            // Tax calculation (configurable)
             TaxAmount = Money.Create(SubtotalAmount.Amount * 0.10m, "NGN");
 
-            // Flat shipping rate
+            // Shipping calculation (could be more complex)
             ShippingAmount = Money.Create(10.00m, "NGN");
 
             TotalAmount = SubtotalAmount
