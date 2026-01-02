@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BetashipEcommerce.CORE\BetashipEcommerce.CORE.csproj" />
+    <ProjectReference Include="..\BetashipEcommerce.DAL\BetashipEcommerce.DAL.csproj" />
+  </ItemGroup>
+
 </Project>
