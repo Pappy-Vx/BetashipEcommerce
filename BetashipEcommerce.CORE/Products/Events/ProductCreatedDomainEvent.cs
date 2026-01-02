@@ -27,4 +27,8 @@ namespace BetashipEcommerce.CORE.Products.Events
     public sealed record ProductPublishedDomainEvent(
         ProductId ProductId,
         string ProductName) : DomainEvent;
+    public sealed record ProductDiscontinuedDomainEvent(
+    ProductId ProductId,
+    string ProductName,
+    string Reason) : DomainEvent;
 }

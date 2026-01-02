@@ -28,6 +28,9 @@ namespace BetashipEcommerce.CORE.Products
         public static readonly Error AlreadyPublished = new("Product.AlreadyPublished",
             "Product is already published");
 
+        public static readonly Error AlreadyDiscontinued = new("Product.AlreadyDiscontinued",
+        "Product is already discontinued");
+
         public static readonly Error CannotPublishWithoutStock = new("Product.CannotPublishWithoutStock",
             "Cannot publish product without available stock");
 
