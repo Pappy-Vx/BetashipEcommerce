@@ -44,9 +44,14 @@ namespace BetashipEcommerce.DAL.Data
             // Apply all configurations from assembly
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
+            // Ignore value object types that shouldn't be mapped as entities
+            modelBuilder.Ignore<BetashipEcommerce.CORE.Identity.ValueObjects.UserId>();
+            modelBuilder.Ignore<BetashipEcommerce.CORE.Products.ValueObjects.ProductId>();
+            modelBuilder.Ignore<BetashipEcommerce.CORE.Orders.ValueObjects.OrderId>();
+            modelBuilder.Ignore<BetashipEcommerce.CORE.Customers.ValueObjects.CustomerId>();
+
             // Global query filters for soft delete
             modelBuilder.Entity<Product>().HasQueryFilter(p => !p.IsDeleted);
-            modelBuilder.Entity<Customer>().HasQueryFilter(c => !EF.Property<bool>(c, "IsDeleted"));
             modelBuilder.Entity<User>().HasQueryFilter(u => !EF.Property<bool>(u, "IsDeleted"));
 
             // Configure schema

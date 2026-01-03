@@ -1,6 +1,7 @@
 ﻿using BetashipEcommerce.CORE.Repositories;
 using BetashipEcommerce.CORE.UnitOfWork;
 using BetashipEcommerce.DAL.Data;
+using BetashipEcommerce.DAL.Data.Seeding;
 using BetashipEcommerce.DAL.Interceptors;
 using BetashipEcommerce.DAL.Repositories;
 using Hangfire;
@@ -68,6 +69,8 @@ namespace BetashipEcommerce.DAL.Persistence
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<DatabaseSeeder>();
 
             // Add Hangfire for background jobs
             services.AddHangfire(config => config

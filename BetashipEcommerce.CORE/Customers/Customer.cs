@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BetashipEcommerce.CORE.Customers
 {
-    public sealed class Customer : AggregateRoot<CustomerId>
+    public sealed class Customer : AuditableAggregateRoot<CustomerId>
     {
         private readonly List<CustomerAddress> _addresses = new();
 

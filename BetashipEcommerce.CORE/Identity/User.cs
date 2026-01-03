@@ -17,7 +17,7 @@ namespace BetashipEcommerce.CORE.Identity
     /// User aggregate for authentication and authorization
     /// Separate from Customer (a user might not be a customer, e.g., admin)
     /// </summary>
-    public sealed class User : AggregateRoot<UserId>
+    public sealed class User : AuditableAggregateRoot<UserId>
     {
         private readonly List<UserRole> _roles = new();
         private readonly List<string> _permissions = new();
