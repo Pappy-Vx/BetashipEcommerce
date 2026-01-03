@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace BetashipEcommerce.CORE.Repositories
 {
-    public interface IRepository<TEntity, TId>
-      where TEntity : AggregateRoot<TId>
+        public interface IRepository<TEntity, TId>
+            where TEntity : Entity<TId>
       where TId : notnull
     {
         Task<TEntity?> GetByIdAsync(TId id, CancellationToken cancellationToken = default);

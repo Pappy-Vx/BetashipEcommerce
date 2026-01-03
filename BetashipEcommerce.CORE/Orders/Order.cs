@@ -19,7 +19,7 @@ namespace BetashipEcommerce.CORE.Orders
     /// Enhanced Order aggregate that tracks inventory reservations and payment
     /// Replaces the basic Order aggregate with enterprise features
     /// </summary>
-    public sealed class Order : AggregateRoot<OrderId>
+    public sealed class Order : AuditableAggregateRoot<OrderId>
     {
         private readonly List<OrderItem> _items = new();
         private readonly List<Guid> _inventoryReservationIds = new();

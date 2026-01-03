@@ -10,7 +10,7 @@ namespace BetashipEcommerce.CORE.SharedKernel
     /// <summary>
     /// Base class for entities that require audit tracking
     /// </summary>
-    public abstract class AuditableEntity<TId> : Entity<TId>
+    public abstract class AuditableEntity<TId> : AggregateRoot<TId>
         where TId : notnull
     {
         public DateTime CreatedAt { get; protected set; }
