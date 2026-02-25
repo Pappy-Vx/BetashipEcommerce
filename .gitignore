@@ -231,3 +231,12 @@ AppPackages/
 #####
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
+
+# =========================
+# Sensitive Configuration Files - NEVER commit secrets!
+# =========================
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.Production.json
+**/secrets.json
+**/usersecrets/

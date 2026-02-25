@@ -50,10 +50,10 @@ namespace BetashipEcommerce.DAL.Data.Configurations
                 .HasMaxLength(200);
 
             builder.Property(a => a.OldValues)
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             builder.Property(a => a.NewValues)
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             builder.Property(a => a.ChangedProperties)
                 .HasMaxLength(1000);

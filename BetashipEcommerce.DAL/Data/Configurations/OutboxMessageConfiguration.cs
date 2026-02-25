@@ -23,7 +23,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
 
             builder.Property(x => x.Content)
                 .IsRequired()
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             builder.Property(x => x.OccurredOnUtc)
                 .IsRequired();
@@ -39,7 +39,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
 
             // Indexes for performance
             builder.HasIndex(x => x.ProcessedOnUtc)
-                .HasFilter("[ProcessedOnUtc] IS NULL")
+                .HasFilter("\"ProcessedOnUtc\" IS NULL")
                 .HasDatabaseName("IX_OutboxMessages_Unprocessed");
 
             builder.HasIndex(x => x.OccurredOnUtc)

@@ -74,7 +74,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
                     roles => System.Text.Json.JsonSerializer.Serialize(roles, (System.Text.Json.JsonSerializerOptions?)null),
                     json => System.Text.Json.JsonSerializer.Deserialize<List<UserRole>>(json, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<UserRole>())
                 .HasColumnName("Roles")
-                .HasColumnType("nvarchar(500)");
+                .HasColumnType("character varying(500)");
 
             // Store permissions as JSON array
             builder.Property(u => u.Permissions)
@@ -82,7 +82,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
                     perms => System.Text.Json.JsonSerializer.Serialize(perms, (System.Text.Json.JsonSerializerOptions?)null),
                     json => System.Text.Json.JsonSerializer.Deserialize<List<string>>(json, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 .HasColumnName("Permissions")
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             // Audit fields
             //builder.Property(u => u.CreatedBy);

@@ -80,6 +80,28 @@ namespace BetashipEcommerce.DAL.BackgroundJobs
                     TimeZone = TimeZoneInfo.Utc,
                     QueueName = "default"
                 });
+
+            // Sync abandoned carts from Redis to Database every 6 hours
+            recurringJobManager.AddOrUpdate<CartSyncBackgroundJob>(
+                "sync-abandoned-carts",
+                job => job.SyncAbandonedCartsAsync(CancellationToken.None),
+                "0 */6 * * *", // Every 6 hours
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.Utc,
+                    QueueName = "maintenance"
+                });
+
+            // Cart cache health check every hour
+            recurringJobManager.AddOrUpdate<CartSyncBackgroundJob>(
+                "cart-cache-health-check",
+                job => job.CartCacheHealthCheckAsync(CancellationToken.None),
+                Cron.Hourly,
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.Utc,
+                    QueueName = "maintenance"
+                });
         }
     }
 }
