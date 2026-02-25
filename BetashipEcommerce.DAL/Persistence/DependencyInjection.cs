@@ -1,5 +1,7 @@
 ﻿using BetashipEcommerce.CORE.Repositories;
+using BetashipEcommerce.CORE.Services;
 using BetashipEcommerce.CORE.UnitOfWork;
+using BetashipEcommerce.DAL.BackgroundJobs;
 using BetashipEcommerce.DAL.Data;
 using BetashipEcommerce.DAL.Data.Seeding;
 using BetashipEcommerce.DAL.Interceptors;
@@ -9,6 +11,8 @@ using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +76,36 @@ namespace BetashipEcommerce.DAL.Persistence
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<DatabaseSeeder>();
 
+            // ─────────────────────────────────────────────────────────
+            // Redis Configuration (Hybrid Cart Strategy)
+            // ─────────────────────────────────────────────────────────
+            var redisConnectionString = configuration.GetConnectionString("Redis")
+                ?? "localhost:6379"; // Default to local Redis
+
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var configOptions = ConfigurationOptions.Parse(redisConnectionString);
+                configOptions.AbortOnConnectFail = false; // Don't crash if Redis is down
+                configOptions.ConnectRetry = 5;
+                configOptions.ConnectTimeout = 5000;
+                configOptions.SyncTimeout = 3000;
+                configOptions.AsyncTimeout = 3000;
+
+                var logger = sp.GetRequiredService<ILogger<ConnectionMultiplexer>>();
+                logger.LogInformation("🔌 Connecting to Redis: {RedisConnection}", redisConnectionString);
+
+                return ConnectionMultiplexer.Connect(configOptions);
+            });
+
+            // Register Redis Cart Cache Service
+            services.AddScoped<ICartCacheService, CartCacheService>();
+
+            // Register Cart Sync Background Job
+            services.AddTransient<CartSyncBackgroundJob>();
+
+            // ─────────────────────────────────────────────────────────
+            // Hangfire Configuration (Background Jobs)
+            // ─────────────────────────────────────────────────────────
             // Add Hangfire for background jobs (PostgreSQL storage for Supabase)
             services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)

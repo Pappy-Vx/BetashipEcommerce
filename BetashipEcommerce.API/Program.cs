@@ -44,10 +44,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-// Configure Hangfire dashboard
-app.UseHangfireDashboard("/hangfire");
+// Configure Hangfire dashboard with authorization
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[]
+    {
+        new HangfireDashboardAuthorizationFilter(app.Environment.IsDevelopment())
+    },
+    DashboardTitle = "BetaShip Ecommerce - Background Jobs",
+    StatsPollingInterval = 5000 // Refresh stats every 5 seconds
+});
 
-// Configure recurring jobs
+// Configure recurring jobs (including cart sync jobs)
 app.Services.ConfigureRecurringJobs();
 
 app.MapControllers();
