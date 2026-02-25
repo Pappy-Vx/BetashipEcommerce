@@ -63,7 +63,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
                 .HasMaxLength(200);
 
             builder.Property(p => p.PaymentGatewayResponse)
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             builder.Property(p => p.CreatedAt).IsRequired();
             builder.Property(p => p.ProcessedAt);

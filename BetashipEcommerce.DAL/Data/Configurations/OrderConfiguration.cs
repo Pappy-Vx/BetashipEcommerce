@@ -100,7 +100,7 @@ namespace BetashipEcommerce.DAL.Data.Configurations
                     ids => System.Text.Json.JsonSerializer.Serialize(ids, (System.Text.Json.JsonSerializerOptions)null),
                     json => System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(json, (System.Text.Json.JsonSerializerOptions)null) ?? new List<Guid>())
                 .HasColumnName("InventoryReservationIds")
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("text");
 
             builder.Property(o => o.OrderDate).IsRequired();
             builder.Property(o => o.ConfirmedAt);

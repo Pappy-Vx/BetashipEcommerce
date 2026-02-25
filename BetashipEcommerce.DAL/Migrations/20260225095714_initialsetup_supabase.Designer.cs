@@ -3,17 +3,17 @@ using System;
 using BetashipEcommerce.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace BetashipEcommerce.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260102210713_Initial")]
-    partial class Initial
+    [Migration("20260225095714_initialsetup_supabase")]
+    partial class initialsetup_supabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,68 +21,68 @@ namespace BetashipEcommerce.DAL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ecommerce")
-                .HasAnnotation("ProductVersion", "8.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("BetashipEcommerce.CORE.Auditing.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("AuditLogId");
 
                     b.Property<int>("Action")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("AdditionalInfo")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("ChangedProperties")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("EntityId")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("EntityName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("IpAddress")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NewValues")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldValues")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserAgent")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -104,23 +104,23 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Carts.ShoppingCart", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ShoppingCartId");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("LastModifiedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -139,42 +139,42 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Customers.Customer", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CustomerId");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeletedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -187,83 +187,83 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Identity.User", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("UserId");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeletedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("EmailVerifiedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("FailedLoginAttempts")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("LastPasswordChangedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("LockedOutUntil")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Permissions")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Permissions");
 
                     b.Property<string>("Roles")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("Roles");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -280,26 +280,26 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Inventory.InventoryItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("InventoryItemId");
 
                     b.Property<int>("AvailableQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("LastRestocked")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("ReorderLevel")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ReorderQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ReservedQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -316,79 +316,79 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Orders.Order", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("OrderId");
 
                     b.Property<string>("CancellationReason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ConfirmedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeletedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("InventoryCommitted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("InventoryReservationIds")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("InventoryReservationIds");
 
                     b.Property<bool>("InventoryReserved")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ShippedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -411,43 +411,43 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Payments.Payment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("PaymentId");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PaymentGatewayResponse")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RetryCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TransactionId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
@@ -469,50 +469,50 @@ namespace BetashipEcommerce.DAL.Migrations
             modelBuilder.Entity("BetashipEcommerce.CORE.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ProductId");
 
                     b.Property<int>("Category")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeletedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -536,29 +536,29 @@ namespace BetashipEcommerce.DAL.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Error")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime>("OccurredOnUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ProcessedOnUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RetryCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
 
@@ -567,7 +567,7 @@ namespace BetashipEcommerce.DAL.Migrations
 
                     b.HasIndex("ProcessedOnUtc")
                         .HasDatabaseName("IX_OutboxMessages_Unprocessed")
-                        .HasFilter("[ProcessedOnUtc] IS NULL");
+                        .HasFilter("\"ProcessedOnUtc\" IS NULL");
 
                     b.ToTable("OutboxMessages", "ecommerce");
                 });
@@ -576,18 +576,18 @@ namespace BetashipEcommerce.DAL.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConsumerName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("OutboxMessageId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("ProcessedOnUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -604,22 +604,22 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<DateTime>("AddedAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<DateTime>("LastModifiedAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Quantity")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<Guid>("ShoppingCartId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.HasKey("Id");
 
@@ -642,12 +642,12 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Customers.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)")
+                                .HasColumnType("character varying(256)")
                                 .HasColumnName("Email");
 
                             b1.HasKey("CustomerId");
@@ -662,18 +662,18 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<bool>("IsDefault")
-                                .HasColumnType("bit");
+                                .HasColumnType("boolean");
 
                             b1.Property<string>("Label")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)");
+                                .HasColumnType("character varying(50)");
 
                             b1.HasKey("Id");
 
@@ -687,36 +687,36 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.OwnsOne("BetashipEcommerce.CORE.Orders.ValueObjects.Address", "Address", b2 =>
                                 {
                                     b2.Property<Guid>("CustomerAddressId")
-                                        .HasColumnType("uniqueidentifier");
+                                        .HasColumnType("uuid");
 
                                     b2.Property<string>("City")
                                         .IsRequired()
                                         .HasMaxLength(100)
-                                        .HasColumnType("nvarchar(100)")
+                                        .HasColumnType("character varying(100)")
                                         .HasColumnName("City");
 
                                     b2.Property<string>("Country")
                                         .IsRequired()
                                         .HasMaxLength(100)
-                                        .HasColumnType("nvarchar(100)")
+                                        .HasColumnType("character varying(100)")
                                         .HasColumnName("Country");
 
                                     b2.Property<string>("PostalCode")
                                         .IsRequired()
                                         .HasMaxLength(20)
-                                        .HasColumnType("nvarchar(20)")
+                                        .HasColumnType("character varying(20)")
                                         .HasColumnName("PostalCode");
 
                                     b2.Property<string>("State")
                                         .IsRequired()
                                         .HasMaxLength(100)
-                                        .HasColumnType("nvarchar(100)")
+                                        .HasColumnType("character varying(100)")
                                         .HasColumnName("State");
 
                                     b2.Property<string>("Street")
                                         .IsRequired()
                                         .HasMaxLength(200)
-                                        .HasColumnType("nvarchar(200)")
+                                        .HasColumnType("character varying(200)")
                                         .HasColumnName("Street");
 
                                     b2.HasKey("CustomerAddressId");
@@ -734,12 +734,12 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Customers.ValueObjects.PhoneNumber", "PhoneNumber", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("PhoneNumber");
 
                             b1.HasKey("CustomerId");
@@ -764,26 +764,26 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("IpAddress")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)");
+                                .HasColumnType("character varying(50)");
 
                             b1.Property<DateTime>("LoginAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<DateTime?>("LogoutAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<string>("UserAgent")
                                 .IsRequired()
                                 .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)");
+                                .HasColumnType("character varying(500)");
 
                             b1.Property<Guid>("UserId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.HasKey("Id");
 
@@ -798,12 +798,12 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Customers.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<Guid>("UserId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)")
+                                .HasColumnType("character varying(256)")
                                 .HasColumnName("Email");
 
                             b1.HasKey("UserId");
@@ -826,30 +826,30 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<DateTime>("ExpiresAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<Guid>("InventoryItemId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Quantity")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("ReservedAt")
-                                .HasColumnType("datetime2");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<string>("ReservedFor")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<int>("Status")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("Id");
 
@@ -876,21 +876,21 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("ProductName")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<int>("Quantity")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("Id");
 
@@ -904,7 +904,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "TotalPrice", b2 =>
                                 {
                                     b2.Property<Guid>("OrderItemId")
-                                        .HasColumnType("uniqueidentifier");
+                                        .HasColumnType("uuid");
 
                                     b2.Property<decimal>("Amount")
                                         .HasColumnType("decimal(18,2)")
@@ -913,7 +913,7 @@ namespace BetashipEcommerce.DAL.Migrations
                                     b2.Property<string>("Currency")
                                         .IsRequired()
                                         .HasMaxLength(3)
-                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnType("character varying(3)")
                                         .HasColumnName("TotalPriceCurrency");
 
                                     b2.HasKey("OrderItemId");
@@ -927,7 +927,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "UnitPrice", b2 =>
                                 {
                                     b2.Property<Guid>("OrderItemId")
-                                        .HasColumnType("uniqueidentifier");
+                                        .HasColumnType("uuid");
 
                                     b2.Property<decimal>("Amount")
                                         .HasColumnType("decimal(18,2)")
@@ -936,7 +936,7 @@ namespace BetashipEcommerce.DAL.Migrations
                                     b2.Property<string>("Currency")
                                         .IsRequired()
                                         .HasMaxLength(3)
-                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnType("character varying(3)")
                                         .HasColumnName("UnitPriceCurrency");
 
                                     b2.HasKey("OrderItemId");
@@ -957,36 +957,36 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Orders.ValueObjects.Address", "BillingAddress", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("BillingCity");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("BillingCountry");
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("BillingPostalCode");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("BillingState");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("BillingStreet");
 
                             b1.HasKey("OrderId");
@@ -1000,36 +1000,36 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Orders.ValueObjects.Address", "ShippingAddress", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("ShippingCity");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("ShippingCountry");
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("ShippingPostalCode");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("ShippingState");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("ShippingStreet");
 
                             b1.HasKey("OrderId");
@@ -1043,7 +1043,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "ShippingAmount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1052,7 +1052,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("ShippingCurrency");
 
                             b1.HasKey("OrderId");
@@ -1066,7 +1066,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "SubtotalAmount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1075,7 +1075,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("SubtotalCurrency");
 
                             b1.HasKey("OrderId");
@@ -1089,7 +1089,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "TaxAmount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1098,7 +1098,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("TaxCurrency");
 
                             b1.HasKey("OrderId");
@@ -1112,7 +1112,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "TotalAmount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1121,7 +1121,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("TotalCurrency");
 
                             b1.HasKey("OrderId");
@@ -1158,7 +1158,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "Amount", b1 =>
                         {
                             b1.Property<Guid>("PaymentId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1167,7 +1167,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("Currency");
 
                             b1.HasKey("PaymentId");
@@ -1188,26 +1188,26 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("AltText")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<bool>("IsPrimary")
-                                .HasColumnType("bit");
+                                .HasColumnType("boolean");
 
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("SortOrder")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Url")
                                 .IsRequired()
                                 .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)");
+                                .HasColumnType("character varying(500)");
 
                             b1.HasKey("Id");
 
@@ -1223,23 +1223,23 @@ namespace BetashipEcommerce.DAL.Migrations
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
+                                .HasColumnType("character varying(100)");
 
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Sku")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)");
+                                .HasColumnType("character varying(50)");
 
                             b1.Property<int>("StockQuantity")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("Id");
 
@@ -1253,7 +1253,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "Price", b2 =>
                                 {
                                     b2.Property<Guid>("ProductVariantId")
-                                        .HasColumnType("uniqueidentifier");
+                                        .HasColumnType("uuid");
 
                                     b2.Property<decimal>("Amount")
                                         .HasColumnType("decimal(18,2)")
@@ -1262,7 +1262,7 @@ namespace BetashipEcommerce.DAL.Migrations
                                     b2.Property<string>("Currency")
                                         .IsRequired()
                                         .HasMaxLength(3)
-                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnType("character varying(3)")
                                         .HasColumnName("Currency");
 
                                     b2.HasKey("ProductVariantId");
@@ -1280,7 +1280,7 @@ namespace BetashipEcommerce.DAL.Migrations
                     b.OwnsOne("BetashipEcommerce.CORE.Products.ValueObjects.Money", "Price", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1289,7 +1289,7 @@ namespace BetashipEcommerce.DAL.Migrations
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("Currency");
 
                             b1.HasKey("ProductId");

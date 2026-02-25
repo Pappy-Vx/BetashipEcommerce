@@ -14,16 +14,17 @@ namespace BetashipEcommerce.DAL.Data
         {
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            // Prefer explicit environment variable, fall back to LocalDB for developer convenience
+            // Prefer explicit environment variable, fall back to local PostgreSQL for developer convenience
             var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
-                ?? "Server=(localdb)\\mssqllocaldb;Database=BetashipEcommerce;Trusted_Connection=True;";
+                ?? "User Id=postgres.oquxoyqxnbniqistwlrl;Password=Kodemon100000$;Server=aws-1-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres";
 
-            builder.UseSqlServer(connectionString, sql =>
+            builder.UseNpgsql(connectionString, npgsql =>
             {
-                sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                npgsql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
             });
 
             return new ApplicationDbContext(builder.Options);
         }
     }
 }
+
