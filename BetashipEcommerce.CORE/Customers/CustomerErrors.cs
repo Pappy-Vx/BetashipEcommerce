@@ -32,5 +32,8 @@ namespace BetashipEcommerce.CORE.Customers
 
         public static readonly Error NotFound = new("Customer.NotFound",
             "Customer not found");
+
+        public static readonly Error DuplicateEmail = new("Customer.DuplicateEmail",
+            "A customer with this email already exists");
     }
 }

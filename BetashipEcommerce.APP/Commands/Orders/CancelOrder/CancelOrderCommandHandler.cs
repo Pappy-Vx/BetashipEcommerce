@@ -1,0 +1,47 @@
+using BetashipEcommerce.CORE.Orders;
+using BetashipEcommerce.CORE.Orders.ValueObjects;
+using BetashipEcommerce.CORE.Repositories;
+using BetashipEcommerce.CORE.SharedKernel;
+using BetashipEcommerce.CORE.UnitOfWork;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace BetashipEcommerce.APP.Commands.Orders.CancelOrder;
+
+public sealed class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, Result>
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CancelOrderCommandHandler> _logger;
+
+    public CancelOrderCommandHandler(
+        IOrderRepository orderRepository,
+        IUnitOfWork unitOfWork,
+        ILogger<CancelOrderCommandHandler> logger)
+    {
+        _orderRepository = orderRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(CancelOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = await _orderRepository.GetByIdAsync(
+            new OrderId(request.OrderId), cancellationToken);
+
+        if (order == null)
+            return Result.Failure(OrderErrors.NotFound);
+
+        var result = order.Cancel(request.Reason);
+        if (!result.IsSuccess)
+            return result;
+
+        _orderRepository.Update(order);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Order {OrderId} cancelled. Reason: {Reason}",
+            request.OrderId, request.Reason);
+
+        return Result.Success();
+    }
+}

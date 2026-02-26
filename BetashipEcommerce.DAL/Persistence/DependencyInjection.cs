@@ -112,12 +112,16 @@ namespace BetashipEcommerce.DAL.Persistence
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(options =>
-                    options.UseNpgsqlConnection(connectionString)));
+                {
+                    options.UseNpgsqlConnection(connectionString);
+                }));
 
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = 5;
+                options.WorkerCount = Math.Min(Environment.ProcessorCount, 5);
                 options.Queues = new[] { "default", "outbox", "notifications", "maintenance" };
+                options.ServerTimeout = TimeSpan.FromMinutes(5);
+                options.ShutdownTimeout = TimeSpan.FromSeconds(30);
             });
 
             return services;

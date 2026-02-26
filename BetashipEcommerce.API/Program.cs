@@ -1,3 +1,4 @@
+using BetashipEcommerce.APP;
 using BetashipEcommerce.DAL.BackgroundJobs;
 using BetashipEcommerce.DAL.Data;
 using BetashipEcommerce.DAL.Data.Seeding;
@@ -15,7 +16,13 @@ builder.Services.AddScoped<BetashipEcommerce.CORE.Repositories.ICurrentUserServi
 
 // Add services
 builder.Services.AddPersistence(builder.Configuration);
-// ... other services ...
+builder.Services.AddApplication();
+
+// Add Authentication and Authorization services
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -42,6 +49,7 @@ if (app.Environment.IsDevelopment())
 
 // Configure middleware
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Configure Hangfire dashboard with authorization
@@ -55,8 +63,19 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
     StatsPollingInterval = 5000 // Refresh stats every 5 seconds
 });
 
-// Configure recurring jobs (including cart sync jobs)
-app.Services.ConfigureRecurringJobs();
+// Configure recurring jobs with delay to allow schema initialization
+_ = Task.Delay(TimeSpan.FromSeconds(2)).ContinueWith(_ =>
+{
+    try
+    {
+        app.Services.ConfigureRecurringJobs();
+    }
+    catch (Exception ex)
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Failed to configure recurring jobs");
+    }
+});
 
 app.MapControllers();
 
