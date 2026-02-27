@@ -36,5 +36,8 @@ namespace BetashipEcommerce.CORE.Products
 
         public static readonly Error NotFound = new("Product.NotFound",
             "Product not found");
+
+        public static readonly Error DuplicateSku = new("Product.DuplicateSku",
+            "A product with this SKU already exists");
     }
 }
