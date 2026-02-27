@@ -1,69 +1,99 @@
+using BetashipEcommerce.API.Configuration;
+using BetashipEcommerce.API.Extensions;
+using BetashipEcommerce.API.Filters;
+using BetashipEcommerce.API.Middleware;
+using BetashipEcommerce.API.Services;
 using BetashipEcommerce.APP;
 using BetashipEcommerce.DAL.BackgroundJobs;
-using BetashipEcommerce.DAL.Data;
 using BetashipEcommerce.DAL.Data.Seeding;
 using BetashipEcommerce.DAL.Persistence;
 using Hangfire;
-using Microsoft.EntityFrameworkCore;
-
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Register IHttpContextAccessor and current user service for interceptors
+// ──────────────────────────────────────────────────────────────────────────────
+// Infrastructure & cross-cutting services
+// ──────────────────────────────────────────────────────────────────────────────
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<BetashipEcommerce.CORE.Repositories.ICurrentUserService, BetashipEcommerce.API.Services.CurrentUserService>();
 
-// Add services
+// Register the single CurrentUserService for both ICurrentUserService contracts:
+//   - CORE version  → used by DAL interceptors (audit columns, soft-delete)
+//   - APP version   → used by MediatR pipeline behaviours (Auditing, Authorization)
+builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddScoped<BetashipEcommerce.CORE.Repositories.ICurrentUserService>(
+    sp => sp.GetRequiredService<CurrentUserService>());
+builder.Services.AddScoped<BetashipEcommerce.APP.Common.Interfaces.ICurrentUserService>(
+    sp => sp.GetRequiredService<CurrentUserService>());
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Domain + Application + Persistence layers
+// ──────────────────────────────────────────────────────────────────────────────
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 
-// Add Authentication and Authorization services
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+// ──────────────────────────────────────────────────────────────────────────────
+// API-layer services: Swagger, CORS, JWT auth, rate limiting, auth policies
+// ──────────────────────────────────────────────────────────────────────────────
+builder.Services.AddApiServices(builder.Configuration);
+builder.Services.AddScoped<IAuthService, SupabaseAuthService>();
 
-builder.Services.AddControllers();
-
+// ──────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Seed database on startup (Development only)
+// ──────────────────────────────────────────────────────────────────────────────
+// Database seeding (Development only)
+// ──────────────────────────────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-
     try
     {
-        var seeder = services.GetRequiredService<DatabaseSeeder>();
-        await seeder.SeedAsync();
-
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Database seeding completed successfully");
+        await scope.ServiceProvider.GetRequiredService<DatabaseSeeder>().SeedAsync();
+        app.Logger.LogInformation("Database seeding completed successfully");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database");
+        app.Logger.LogError(ex, "Database seeding failed");
     }
 }
 
-// Configure middleware
+// ──────────────────────────────────────────────────────────────────────────────
+// Middleware pipeline (order matters)
+// ──────────────────────────────────────────────────────────────────────────────
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<SupabaseApiKeyMiddleware>();
+
 app.UseHttpsRedirection();
+app.UseCorsPolicy();
+app.UseApiRateLimiting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure Hangfire dashboard with authorization
+// ──────────────────────────────────────────────────────────────────────────────
+// Swagger UI (Development only)
+// ──────────────────────────────────────────────────────────────────────────────
+app.UseSwaggerUi();
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Hangfire dashboard
+// ──────────────────────────────────────────────────────────────────────────────
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = new[]
     {
-        new HangfireDashboardAuthorizationFilter(app.Environment.IsDevelopment())
+        new HangfireAuthorizationFilter(app.Environment.IsDevelopment())
     },
-    DashboardTitle = "BetaShip Ecommerce - Background Jobs",
-    StatsPollingInterval = 5000 // Refresh stats every 5 seconds
+    DashboardTitle       = "BetaShip Ecommerce - Background Jobs",
+    StatsPollingInterval = 5000
 });
 
-// Configure recurring jobs with delay to allow schema initialization
+// ──────────────────────────────────────────────────────────────────────────────
+// Recurring background jobs
+// ──────────────────────────────────────────────────────────────────────────────
 _ = Task.Delay(TimeSpan.FromSeconds(2)).ContinueWith(_ =>
 {
     try
@@ -77,6 +107,9 @@ _ = Task.Delay(TimeSpan.FromSeconds(2)).ContinueWith(_ =>
     }
 });
 
-app.MapControllers();
+// ──────────────────────────────────────────────────────────────────────────────
+// Minimal API endpoint discovery
+// ──────────────────────────────────────────────────────────────────────────────
+app.MapEndpoints(Assembly.GetExecutingAssembly());
 
 app.Run();

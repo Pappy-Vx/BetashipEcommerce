@@ -111,6 +111,21 @@ namespace BetashipEcommerce.CORE.Products
             return Result.Success();
         }
 
+        public Result UpdateDetails(string name, string description, string sku)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Result.Failure(ProductErrors.InvalidName);
+
+            if (string.IsNullOrWhiteSpace(sku))
+                return Result.Failure(ProductErrors.InvalidSku);
+
+            Name = name;
+            Description = description;
+            Sku = sku;
+
+            return Result.Success();
+        }
+
         public void AddImage(ProductImage image)
         {
             _images.Add(image);
